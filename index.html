@@ -1,0 +1,148 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101820">
+<title>Corte de Produção</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:18px;background:#101820;color:#f4f7fa;font-family:Arial,sans-serif}
+main{max-width:650px;margin:auto}
+h1{color:#65b5ff;text-align:center}
+.card{background:#1b2732;border:1px solid #40505e;border-radius:14px;padding:16px;margin:14px 0}
+label{display:block;margin:12px 0 7px;font-weight:bold}
+select,input{width:100%;padding:12px;border-radius:9px;background:#101820;color:white;border:1px solid #40505e;font-size:16px}
+button{width:100%;padding:13px;margin-top:12px;border:0;border-radius:9px;background:#2f668a;color:white;font-size:16px;font-weight:bold}
+.choice{display:flex;align-items:center;gap:9px;margin:10px 0}
+.choice input{width:auto}
+#result{display:none;overflow-wrap:anywhere}
+#result h3{font-size:16px}
+.big{font-size:22px;font-weight:bold}
+.muted{color:#aab9c7;font-size:13px}
+</style>
+</head>
+<body>
+<main>
+<h1>▦ Corte de Produção</h1>
+<p style="text-align:center;color:#aab9c7">Planejamento de caixas e paletes</p>
+
+<div class="card">
+<label for="produto">1. Escolha o produto</label>
+<select id="produto">
+<option>Coca Cola Original</option>
+<option selected>Coca Cola Sem Açúcar</option>
+<option>Coca Cola Bib</option>
+<option>Coca Cola MA Batelada</option>
+<option>Coca Cola Café</option>
+<option>Preparado CC Byte Sem Açúcar</option>
+<option>Fanta Mistério</option>
+<option>Fanta Maracujá</option>
+<option>Laranja Full Sugar</option>
+<option>Fanta Guaraná Bib</option>
+<option>Sprite Fresh Lemon</option>
+<option>Fanta Guaraná</option>
+<option>Sprite Original</option>
+<option>Sprite Sem Açúcar</option>
+<option>Uva MID CAL</option>
+<option>KUAT MIDCAL</option>
+<option>Del Valle Frut Uva</option>
+<option>Del Valle Fresh Laranja</option>
+<option>Del Valle Fresh Limão</option>
+<option>Del Valle Fresh Uva</option>
+<option>Del Valle Frut Goiaba</option>
+<option>Del Valle Frut Pêssego</option>
+<option>Del Valle Frut Manga</option>
+<option>Del Valle Frut Laranja</option>
+<option>Del Valle Frut Frutas Cítricas</option>
+<option>Ice Tea Limão</option>
+</select>
+</div>
+
+<div class="card">
+<label>2. Escolha a operação</label>
+<label class="choice"><input type="radio" name="tipo" value="paletes"> Transformar paletes em caixas</label>
+<label class="choice"><input type="radio" name="tipo" value="xarope" checked> Corte pelo xarope</label>
+
+<label>3. Latas por caixa</label>
+<label class="choice"><input type="radio" name="latas" value="6" checked> 6 latas</label>
+<label class="choice"><input type="radio" name="latas" value="12"> 12 latas</label>
+
+<div id="campoPaletes" style="display:none">
+<label for="paletes">Quantidade de paletes de latas</label>
+<input id="paletes" type="number" min="0" step="any" value="1">
+</div>
+
+<div id="campoCaixas">
+<label for="caixas">Quantidade de caixas planejadas</label>
+<input id="caixas" type="number" min="0" step="1" value="3000">
+</div>
+<button id="calcular">Calcular resultado</button>
+</div>
+
+<div class="card" id="result" aria-live="polite">
+<h3 id="tituloResultado"></h3>
+<div class="big" id="resultado"></div>
+<p id="detalhe" class="muted"></p>
+<button id="whatsapp">Enviar pelo WhatsApp</button>
+<button id="copiar" style="background:#344451">Copiar mensagem</button>
+</div>
+<p class="muted" style="text-align:center">Tema escuro • Corte de Produção</p>
+</main>
+<script>
+const el=id=>document.getElementById(id);
+let mensagem='';
+function tipo(){return document.querySelector('input[name="tipo"]:checked').value}
+function latas(){return Number(document.querySelector('input[name="latas"]:checked').value)}
+function numero(n){return Math.round(n).toLocaleString('pt-BR')}
+document.querySelectorAll('input[name="tipo"]').forEach(r=>r.addEventListener('change',()=>{
+el('campoPaletes').style.display=tipo()==='paletes'?'block':'none';
+el('campoCaixas').style.display=tipo()==='xarope'?'block':'none';
+el('result').style.display='none';
+}));
+document.querySelectorAll('input[name="latas"]').forEach(r=>r.addEventListener('change',()=>el('result').style.display='none'));
+
+el('calcular').addEventListener('click',()=>{
+const produto=el('produto').value;
+const porPalete=8169, porCaixa=latas();
+let titulo,resultado,detalhe;
+if(tipo()==='paletes'){
+const p=Number(el('paletes').value);
+if(!Number.isFinite(p)||p<0){alert('Informe uma quantidade válida de paletes.');return}
+const total=p*porPalete;
+const completas=Math.floor(total/porCaixa);
+const sobra=Math.round(total-completas*porCaixa);
+titulo='RESULTADO PARA '+produto.toLocaleUpperCase('pt-BR');
+resultado=numero(completas)+' caixas completas';
+detalhe=sobra?'Sobram '+numero(sobra)+' latas.':'Sem latas restantes.';
+mensagem='*Corte de Produção*\nProduto: '+produto+'\n'+titulo+'\n'+resultado+(sobra?'\nLatas restantes: '+numero(sobra):'');
+}else{
+const c=Number(el('caixas').value);
+if(!Number.isFinite(c)||c<0){alert('Informe uma quantidade válida de caixas.');return}
+const equivalente=c*porCaixa/porPalete;
+let p=Math.floor(equivalente+1e-10);
+let camadas=Math.ceil((equivalente-p)*21-1e-10);
+if(camadas>=21){p++;camadas=0}
+titulo='RESULTADO PARA '+produto.toLocaleUpperCase('pt-BR');
+resultado=numero(c)+' caixas completas';
+detalhe='Necessidade estimada: '+p+' palete'+(p===1?'':'s')+(camadas?' e '+camadas+' camadas de latas':'')+'.';
+mensagem='*Corte de Produção*\nProduto: '+produto+'\n'+titulo+'\n'+resultado+'\n'+p+' palete'+(p===1?'':'s')+(camadas?' e '+camadas+' camadas de latas':'');
+}
+el('tituloResultado').textContent=titulo;
+el('resultado').textContent=resultado;
+el('detalhe').textContent=detalhe;
+el('result').style.display='block';
+});
+el('whatsapp').addEventListener('click',()=>{
+if(!mensagem)return;
+window.open('https://wa.me/?text='+encodeURIComponent(mensagem),'_blank');
+});
+el('copiar').addEventListener('click',async()=>{
+if(!mensagem)return;
+try{await navigator.clipboard.writeText(mensagem);alert('Mensagem copiada! Cole no WhatsApp.')}
+catch(e){const t=document.createElement('textarea');t.value=mensagem;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();alert('Mensagem copiada! Cole no WhatsApp.')}
+});
+</script>
+</body>
+</html>
